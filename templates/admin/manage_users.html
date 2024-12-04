@@ -1,0 +1,39 @@
+<!-- templates/admin/manage_users.html -->
+
+{% extends 'base.html' %}
+{% block title %}Управління користувачами{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Управління користувачами</h2>
+    <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary mb-3">Додати користувача</a>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Ім'я користувача</th>
+                <th>Адміністратор</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{% if user.is_admin %}Так{% else %}Ні{% endif %}</td>
+                <td>
+                    <a href="{{ url_for('admin.reset_password', user_id=user.id) }}" class="btn btn-warning btn-sm">Змінити пароль</a>
+                    <a href="{{ url_for('admin.user_resumes', user_id=user.id) }}" class="btn btn-info btn-sm">Резюме</a>
+                    <a href="{{ url_for('admin.user_jobs', user_id=user.id) }}" class="btn btn-info btn-sm">Вакансії</a>
+                    {% if user.id != current_user.id %}
+                    <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ви впевнені, що хочете видалити цього користувача?')">Видалити</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

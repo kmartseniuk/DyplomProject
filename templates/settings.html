@@ -1,0 +1,22 @@
+<!--templates/settings.html-->
+
+{% extends 'base.html' %}
+{% block title %}Налаштування{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Налаштування</h2>
+    <form method="POST">
+        <h4>Зміна паролю</h4>
+        <div class="form-group">
+            <label>Поточний пароль</label>
+            <input type="password" name="current_password" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Новий пароль</label>
+            <input type="password" name="new_password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Змінити пароль</button>
+    </form>
+    <!-- You can add LinkedIn integration code here if needed -->
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+<!--templates/index.html-->
+{% extends 'base.html' %}
+{% block title %}Головна сторінка{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1>Ласкаво просимо, {{ current_user.username }}!</h1>
+    <ul class="list-group">
+        <li class="list-group-item"><a href="{{ url_for('main.dashboard') }}">Панель управління</a></li>
+        <li class="list-group-item"><a href="{{ url_for('main.settings') }}">Налаштування</a></li>
+        <li class="list-group-item"><a href="{{ url_for('auth.logout') }}">Вийти</a></li>
+    </ul>
+</div>
+{% endblock %}

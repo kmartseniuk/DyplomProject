@@ -1,0 +1,368 @@
+<!-- templates/dashboard.html -->
+
+{% extends 'base.html' %}
+{% block title %}Панель управління{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="animate__animated animate__fadeInDown">Панель управління</h2>
+    <p>Ласкаво просимо, {{ current_user.username }}!</p>
+    <hr>
+    <h3>Ваші резюме</h3>
+    <form id="uploadResumeForm" method="post" enctype="multipart/form-data">
+      <input type="file" name="resumes" multiple required>
+      <button type="submit" id="uploadResumeButton" class="btn btn-primary" style="margin-bottom: 10px;">Завантажити резюме</button>
+  </form>
+  <!-- Прогрес бар завантаження -->
+  <div id="uploadProgress" style="display:none; margin-top:10px;">
+      <div class="progress">
+          <div id="uploadProgressBar" class="progress-bar" role="progressbar" style="width:0%"></div>
+      </div>
+      <p id="uploadProgressText">Завантаження...</p>
+  </div>
+
+    <!-- Поля пошуку для резюме -->
+    <form method="get" action="{{ url_for('main.dashboard') }}" id="resume-search-form" onsubmit="return false;">
+        <!-- Збереження існуючих параметрів пошуку вакансій -->
+        <input type="hidden" name="job_name_search" value="{{ request.args.get('job_name_search', '') }}">
+        <input type="hidden" name="job_skill_search" value="{{ request.args.get('job_skill_search', '') }}">
+        <div class="form-row">
+            <div class="form-group col-md-3">
+                <input type="text" name="name_search" id="name_search" class="form-control" placeholder="Пошук за ім'ям" value="{{ request.args.get('name_search', '') }}">
+            </div>
+            <div class="form-group col-md-3">
+                <input type="text" name="skill_search" id="skill_search" class="form-control" placeholder="Пошук за навичками" value="{{ request.args.get('skill_search', '') }}">
+            </div>
+            <div class="form-group col-md-3">
+              <input type="text" name="knowledge_search" id="knowledge_search" class="form-control" placeholder="Пошук за знаннями" value="{{ request.args.get('knowledge_search', '') }}">
+          </div>
+            <div class="form-group col-md-2">
+                <select id="resumePerPage" name="resume_per_page" class="form-control">
+                    <option value="10" {% if resume_per_page == 10 %}selected{% endif %}>10 записів</option>
+                    <option value="25" {% if resume_per_page == 25 %}selected{% endif %}>25 записів</option>
+                    <option value="50" {% if resume_per_page == 50 %}selected{% endif %}>50 записів</option>
+                    <option value="100" {% if resume_per_page == 100 %}selected{% endif %}>100 записів</option>
+                </select>
+            </div>
+            <div class="form-group col-md-4 text-right">
+                <div class="form-check form-check-inline">
+                    <input type="checkbox" name="has_phone" class="form-check-input" id="has_phone" {% if request.args.get('has_phone') %}checked{% endif %}>
+                    <label class="form-check-label" for="has_phone">Має телефон</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input type="checkbox" name="has_email" class="form-check-input" id="has_email" {% if request.args.get('has_email') %}checked{% endif %}>
+                    <label class="form-check-label" for="has_email">Має email</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input type="checkbox" name="has_rating" class="form-check-input" id="has_rating" {% if request.args.get('has_rating') %}checked{% endif %}>
+                    <label class="form-check-label" for="has_rating">Має оцінку</label>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-striped animate__animated animate__fadeInUp" id="resumes-table">
+        <thead>
+            <tr>
+              <th style="width: 5%;">#</th>
+              <th style="width: 15%;">Ім'я</th>
+              <th style="width: 25%;">Навички</th>
+              <th style="width: 25%;">Знання</th> <!-- Додано -->
+              <th style="width: 5%;">Оцінка</th>
+              <th style="width: 10%;">Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for resume in resumes_paginated.items %}
+            <tr class="table-row">
+                <td>{{ loop.index + (resumes_paginated.page - 1) * resumes_paginated.per_page }}</td>
+                <td>
+                    <a href="#" class="view-resume" data-id="{{ resume.id }}">{{ resume.name }}</a>
+                </td>
+                <td data-id="{{ resume.id }}" data-field="skills">
+                  <div class="text-truncate skills-knowledge-display">{{ resume.skills }}</div>
+                </div>
+              </td>
+              <td data-id="{{ resume.id }}" data-field="knowledge">
+                <div class="text-truncate skills-knowledge-display">{{ resume.knowledge }}</div>
+              </td>
+                <td>
+                    {% if resume.rating %}
+                        {{ resume.rating }}★
+                    {% else %}
+                        <!-- Порожнє поле -->
+                    {% endif %}
+                </td>
+                <td>
+                    <!-- Кнопка "Улюблене" -->
+                    <button class="btn btn-link favorite-resume" data-id="{{ resume.id }}">
+                        {% if resume.is_favorite %}
+                            <i class="fas fa-heart text-danger"></i>
+                        {% else %}
+                            <i class="far fa-heart"></i>
+                        {% endif %}
+                    </button>
+                    <!-- Додаткові дії -->
+                    <div class="dropdown d-inline">
+                        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton{{ resume.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ resume.id }}">
+                            <a class="dropdown-item delete-resume text-danger" href="#" data-id="{{ resume.id }}">Видалити</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!-- Пагінація резюме -->
+    <div class="pagination_list clearfix resume-pagination">
+        <nav>
+            <ul class="pagination">
+                {% set args = request.args.to_dict() %}
+                {% do args.pop('resume_page', None) %}
+                {% do args.update({'resume_per_page': resume_per_page}) %}
+                {% if resumes_paginated.has_prev %}
+                <li class="page-item">
+                    <a rel="prev" class="page-link" href="{{ url_for('main.dashboard', resume_page=resumes_paginated.prev_num, **args) }}" title="Попередня сторінка">
+                        &laquo;
+                    </a>
+                </li>
+                {% endif %}
+                {% for page in resumes_paginated.iter_pages(left_edge=2, right_edge=2, left_current=3, right_current=3) %}
+                    {% if page %}
+                        {% if page == resumes_paginated.page %}
+                        <li class="page-item active"><span class="page-link">{{ page }}</span></li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.dashboard', resume_page=page, **args) }}">{{ page }}</a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item"><span class="page-link">…</span></li>
+                    {% endif %}
+                {% endfor %}
+                {% if resumes_paginated.has_next %}
+                <li class="page-item">
+                    <a rel="next" class="page-link" href="{{ url_for('main.dashboard', resume_page=resumes_paginated.next_num, **args) }}" title="Наступна сторінка">
+                        &raquo;
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Модальне вікно для перегляду та редагування резюме -->
+    <!-- Включення шаблону модального вікна резюме -->
+    {% include 'resume_modal.html' %}
+
+    <hr>
+    <h3>Ваші вакансії</h3>
+    <!-- Кнопка для відкриття модального вікна додавання вакансії -->
+    <button class="btn btn-success mb-2 animate__animated animate__fadeInRight" data-toggle="modal" data-target="#addJobModal">Додати вакансію</button>
+
+    <!-- Поля пошуку для вакансій -->
+    <form method="get" action="{{ url_for('main.dashboard') }}" id="job-search-form" onsubmit="return false;">
+        <!-- Збереження існуючих параметрів пошуку резюме -->
+        <input type="hidden" name="name_search" value="{{ request.args.get('name_search', '') }}">
+        <input type="hidden" name="skill_search" value="{{ request.args.get('skill_search', '') }}">
+        {% if request.args.get('has_phone') %}
+        <input type="hidden" name="has_phone" value="on">
+        {% endif %}
+        {% if request.args.get('has_email') %}
+        <input type="hidden" name="has_email" value="on">
+        {% endif %}
+        {% if request.args.get('has_rating') %}
+        <input type="hidden" name="has_rating" value="on">
+        {% endif %}
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <input type="text" name="job_name_search" id="job_name_search" class="form-control" placeholder="Пошук вакансій за назвою" value="{{ request.args.get('job_name_search', '') }}">
+            </div>
+            <div class="form-group col-md-4">
+                <input type="text" name="job_skill_search" id="job_skill_search" class="form-control" placeholder="Пошук вакансій за навичками" value="{{ request.args.get('job_skill_search', '') }}">
+            </div>
+            <div class="form-group col-md-4">
+              <input type="text" name="job_knowledge_search" id="job_knowledge_search" class="form-control" placeholder="Пошук вакансій за знаннями" value="{{ request.args.get('job_knowledge_search', '') }}">
+          </div>
+            <div class="form-group col-md-4">
+                <select id="jobPerPage" name="job_per_page" class="form-control">
+                    <option value="5" {% if job_per_page == 5 %}selected{% endif %}>5 записів</option>
+                    <option value="25" {% if job_per_page == 25 %}selected{% endif %}>25 записів</option>
+                    <option value="50" {% if job_per_page == 50 %}selected{% endif %}>50 записів</option>
+                    <option value="100" {% if job_per_page == 100 %}selected{% endif %}>100 записів</option>
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-striped animate__animated animate__fadeInUp" id="jobs-table">
+        <thead>
+            <tr>
+              <th style="width: 5%;">#</th>
+              <th style="width: 15%;">Назва</th>
+              <th style="width: 25%;">Навички</th>
+              <th style="width: 25%;">Знання</th> <!-- Додано -->
+              <th style="width: 10%;">Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs_paginated.items %}
+            <tr class="table-row">
+                <td>{{ loop.index + (jobs_paginated.page - 1) * jobs_paginated.per_page }}</td>
+                <td>
+                    <a href="#" class="edit-job" data-id="{{ job.id }}">{{ job.title }}</a>
+                </td>
+                <td data-id="{{ job.id }}" data-field="skills"><div class="text-truncate skills-knowledge-display">{{ job.skills }}</div></td>
+                <td data-id="{{ job.id }}" data-field="knowledge"><div class="text-truncate skills-knowledge-display">{{ job.knowledge }}</div></td>
+              </td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonJob{{ job.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonJob{{ job.id }}">
+                            <a class="dropdown-item delete-job text-danger" href="#" data-id="{{ job.id }}">Видалити</a>
+                            <a class="dropdown-item" href="{{ url_for('job.rank_resumes', job_id=job.id) }}">Ранжувати резюме</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!-- Пагінація вакансій -->
+    <div class="pagination_list clearfix job-pagination">
+        <nav>
+            <ul class="pagination">
+                {% set args = request.args.to_dict() %}
+                {% do args.pop('job_page', None) %}
+                {% do args.update({'job_per_page': job_per_page}) %}
+                {% if jobs_paginated.has_prev %}
+                <li class="page-item">
+                    <a rel="prev" class="page-link" href="{{ url_for('main.dashboard', job_page=jobs_paginated.prev_num, **args) }}" title="Попередня сторінка">
+                        &laquo;
+                    </a>
+                </li>
+                {% endif %}
+                {% for page in jobs_paginated.iter_pages(left_edge=2, right_edge=2, left_current=3, right_current=3) %}
+                    {% if page %}
+                        {% if page == jobs_paginated.page %}
+                        <li class="page-item active"><span class="page-link">{{ page }}</span></li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.dashboard', job_page=page, **args) }}">{{ page }}</a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item"><span class="page-link">…</span></li>
+                    {% endif %}
+                {% endfor %}
+                {% if jobs_paginated.has_next %}
+                <li class="page-item">
+                    <a rel="next" class="page-link" href="{{ url_for('main.dashboard', job_page=jobs_paginated.next_num, **args) }}" title="Наступна сторінка">
+                        &raquo;
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Модальне вікно додавання вакансії -->
+    <div class="modal fade" id="addJobModal" tabindex="-1" role="dialog" aria-labelledby="addJobModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <form id="addJobForm">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addJobModalLabel">Додати вакансію</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Закрити">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Назва вакансії</label>
+                <input type="text" name="title" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label>Опис вакансії</label>
+                <textarea name="description" class="form-control" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Додати</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальне вікно редагування вакансії -->
+    {% include 'job_modal.html' %}
+
+    <!-- Модальне вікно завантаження резюме -->
+    <div class="modal fade" id="uploadResumeModal" tabindex="-1" role="dialog" aria-labelledby="uploadResumeModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <form id="uploadResumeForm" enctype="multipart/form-data">
+            <div class="modal-header">
+              <h5 class="modal-title" id="uploadResumeModalLabel">
+                Завантажити резюме
+              </h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Закрити">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Виберіть PDF файли</label>
+                <input type="file" name="resumes" accept=".pdf" class="form-control-file" multiple required>
+              </div>
+              <div id="uploadProgress" style="display:none;">
+                <p id="uploadProgressText">Завантажено: 0 з 0</p>
+                <div class="progress">
+                  <div id="uploadProgressBar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" id="uploadResumeButton">Завантажити</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var resumeUrls = {
+        getResumeInfoBase: "{{ url_for('resume.get_resume_info', resume_id=999999) | replace('999999', '') }}",
+        resumePdfBase: "{{ url_for('resume.resume_pdf', resume_id=999999) | replace('999999', '') }}",
+        updateResumeBase: "{{ url_for('resume.update_resume', resume_id=999999) | replace('999999', '') }}",
+        deleteResumeBase: "{{ url_for('resume.delete_resume', resume_id=999999) | replace('999999', '') }}",
+        toggleFavoriteResume: "{{ url_for('resume.toggle_favorite_resume') }}",
+        autocompleteSkills: "{{ url_for('resume.autocomplete_skills') }}",
+        autocompleteKnowledge: "{{ url_for('resume.autocomplete_knowledge') }}"
+    };
+    var jobUrls = {
+        getJobInfoBase: "{{ url_for('job.get_job_info', job_id=999999) | replace('999999', '') }}",
+        updateJobBase: "{{ url_for('job.update_job', job_id=999999) | replace('999999', '') }}",
+        deleteJobBase: "{{ url_for('job.delete_job', job_id=999999) | replace('999999', '') }}",
+        addJobUrl: "{{ url_for('job.add_job_ajax') }}",
+        autocompleteJobSkills: "{{ url_for('job.autocomplete_job_skills') }}",
+        autocompleteJobKnowledge: "{{ url_for('job.autocomplete_job_knowledge') }}"
+    };
+    var dashboardUrl = "{{ url_for('main.dashboard') }}";
+    var uploadResumeUrl = "{{ url_for('resume.upload_resume') }}";
+</script>
+<!-- Підключення jQuery UI для autocomplete -->
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+<!-- Підключаємо Socket.IO -->
+<script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+<!-- Підключаємо розділені JS файли -->
+<script src="{{ url_for('static', filename='js/resumes.js') }}"></script>
+<script src="{{ url_for('static', filename='js/jobs.js') }}"></script>
+{% endblock %}

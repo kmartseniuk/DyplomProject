@@ -1,0 +1,33 @@
+<!-- templates/admin/user_resumes.html -->
+
+{% extends 'base.html' %}
+{% block title %}Резюме користувача{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Резюме користувача "{{ user.username }}"</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Ім'я</th>
+                <th>Email</th>
+                <th>Телефон</th>
+                <th>Навички</th>
+                <th>Знання</th> <!-- Added Knowledge Column -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for resume in resumes %}
+            <tr>
+                <td>{{ resume.number }}</td>
+                <td>{{ resume.name }}</td>
+                <td>{{ resume.email }}</td>
+                <td>{{ resume.phone }}</td>
+                <td>{{ resume.skills }}</td>
+                <td>{{ resume.knowledge }}</td> <!-- Display Knowledge -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+<!-- templates/admin/user_jobs.html -->
+
+{% extends 'base.html' %}
+{% block title %}Вакансії користувача{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Вакансії користувача "{{ user.username }}"</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Назва</th>
+                <th>Опис</th>
+                <th>Навички</th>
+                <th>Знання</th> <!-- Added Knowledge Column -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+            <tr>
+                <td>{{ job.number }}</td>
+                <td>{{ job.title }}</td>
+                <td>{{ job.description }}</td>
+                <td>{{ job.skills }}</td>
+                <td>{{ job.knowledge }}</td> <!-- Display Knowledge -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

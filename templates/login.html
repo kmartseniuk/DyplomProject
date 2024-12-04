@@ -1,0 +1,19 @@
+<!--templates/login.html-->
+{% extends 'base.html' %}
+{% block title %}Вхід{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Вхід</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label>Ім'я користувача</label>
+            <input type="text" name="username" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Пароль</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Увійти</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+<!-- templates/resume_modal.html -->
+
+<div class="modal fade" id="resumeModal" tabindex="-1" role="dialog" aria-labelledby="resumeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content">
+        <form id="resumeEditForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="resumeModalLabel">Перегляд та редагування резюме</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Закрити">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="resumeId" name="resume_id">
+            <div class="row">
+              <div class="col-md-8">
+                <iframe id="resumeFrame" src="" width="100%" height="900px"></iframe>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="resumeName">Ім'я кандидата</label>
+                  <input type="text" class="form-control" id="resumeName" name="name" required>
+                </div>
+                <div class="form-group">
+                  <label for="resumeEmail">Email</label>
+                  <input type="email" class="form-control" id="resumeEmail" name="email">
+                </div>
+                <div class="form-group">
+                  <label for="resumePhone">Телефон</label>
+                  <input type="text" class="form-control" id="resumePhone" name="phone">
+                </div>
+                <div class="form-group">
+                  <label for="resumeSkills">Навички</label>
+                  <input type="text" class="form-control" id="resumeSkills" name="skills" data-role="tagsinput">
+                  </div>
+                <div class="form-group">
+                  <label for="resumeKnowledge">Знання</label>
+                  <input type="text" class="form-control" id="resumeKnowledge" name="knowledge" data-role="tagsinput">
+                </div>
+                <div class="form-group">
+                  <label for="resumeFeedback">Відгук про кандидата</label>
+                  <textarea class="form-control" id="resumeFeedback" name="feedback" rows="3"></textarea>
+              </div>
+                <div class="form-group">
+                  <label for="resumeRating">Оцінка</label>
+                  <input type="number" class="form-control" id="resumeRating" name="rating" min="0" max="5" step="0.1">
+                </div>
+                <button type="button" id="favoriteResumeButton" class="btn btn-outline-danger">
+                  <i id="favoriteIcon" class="far fa-heart"></i> Додати в обране
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрити</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  

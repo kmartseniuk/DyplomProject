@@ -1,0 +1,103 @@
+<!-- templates/ranking_results_content.html -->
+
+<!-- Filters -->
+<div class="mt-3">
+    <label class="mr-2"><input type="checkbox" id="hasPhoneFilter"> Мають телефон</label>
+    <label class="mr-2"><input type="checkbox" id="hasEmailFilter"> Мають Email</label>
+    <label><input type="checkbox" id="hasRatingFilter"> Стоїть оцінка</label>
+</div>
+
+<!-- Ranking Results Table -->
+<table id="rankingResultsTable" class="table table-striped mt-4">
+    <thead>
+        <tr>
+            <th>Кандидат</th>
+            <th>Навички</th>
+            <th>Знання</th>
+            <th>Загальна відповідність</th>
+            <th>Sentence-BERT</th>
+            <th>TF-IDF</th>
+            <th>GloVe</th>
+            <th>BM25</th>
+            <th>Ключові слова</th>
+            <th>Оцінка</th>
+            <th>Улюблене</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for result in combined_results %}
+        <tr data-has-phone="{{ 'true' if result.has_phone else 'false' }}"
+            data-has-email="{{ 'true' if result.has_email else 'false' }}"
+            data-has-rating="{{ 'true' if result.rating else 'false' }}">
+        
+            <td>
+                <a href="#" class="view-resume" data-id="{{ result.resume.id }}">{{ result.resume.name }}</a>
+            </td>
+            <td>
+                {% if result.score_skills is not none %}
+                    {{ result.score_skills }}%
+                {% else %}
+                {% endif %}
+            </td>
+            <td>
+                {% if result.score_knowledge is not none %}
+                    {{ result.score_knowledge }}%
+                {% else %}
+                {% endif %}
+            </td>
+            <td>
+                {% if result.score_combined is not none %}
+                    {{ result.score_combined }}%
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+            <td>
+                {% if result.scores.get('sbert') is not none %}
+                    {{ result.scores.get('sbert') }}%
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+            <td>
+                {% if result.scores.get('tfidf') is not none %}
+                    {{ result.scores.get('tfidf') }}%
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+            <td>
+                {% if result.scores.get('glove') is not none %}
+                    {{ result.scores.get('glove') }}%
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+            <td>
+                {% if result.scores.get('bm25') is not none %}
+                    {{ result.scores.get('bm25') }}%
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+            <td>{{ result.matching_keywords }}</td>
+            <td>
+                {% if result.rating %}
+                    {{ result.rating }}★
+                {% else %}
+                {% endif %}
+            </td>
+            <td>
+                <!-- Favorite button -->
+                <button class="btn btn-link favorite-resume" data-id="{{ result.resume.id }}">
+                    {% if result.is_favorite %}
+                        <i class="fas fa-heart text-danger"></i>
+                    {% else %}
+                        <i class="far fa-heart"></i>
+                    {% endif %}
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

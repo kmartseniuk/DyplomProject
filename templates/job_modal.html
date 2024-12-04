@@ -1,0 +1,46 @@
+<!-- templates/job_modal.html -->
+
+<div class="modal fade" id="jobModal" tabindex="-1" role="dialog" aria-labelledby="jobModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content">
+        <form id="jobEditForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="jobModalLabel">Перегляд та редагування вакансії</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Закрити">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" name="job_id" id="jobId">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="form-group">
+                  <label>Опис вакансії</label>
+                  <textarea name="description" class="form-control" id="jobDescription" rows="20"></textarea>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Назва вакансії</label>
+                  <input type="text" name="title" class="form-control" id="jobTitle" required>
+                </div>
+                <div class="form-group">
+                  <label>Навички</label>
+                  <input type="text" name="skills" class="form-control" id="jobSkills" data-role="tagsinput">
+                </div>
+                <div class="form-group">
+                  <label>Знання</label>
+                  <input type="text" name="knowledge" class="form-control" id="jobKnowledge" data-role="tagsinput">
+                </div>
+                <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрити</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  

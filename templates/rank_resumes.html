@@ -1,0 +1,64 @@
+<!-- templates/rank_resumes.html -->
+
+{% extends 'base.html' %}
+{% block title %}Ранжування резюме{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Ранжування резюме для вакансії "{{ job.title }}"</h2>
+
+    <!-- Кнопка для початку ранжування -->
+    <div class="mt-3">
+        <button id="start-ranking" class="btn btn-primary">Почати ранжування</button>
+    </div>
+
+
+    <!-- Прогрес бар -->
+    <div id="progress-container" style="display:none; margin-top: 20px;">
+        <h3 id="progress-text">Ранжування триває...</h3>
+        <div class="progress">
+            <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+        </div>
+    </div>
+
+    <!-- Контейнер для результатів ранжування -->
+    <div id="ranking-results" class="mt-4">
+        {% include 'ranking_results_content.html' %}
+    </div>
+</div>
+
+<!-- Include Resume Modal -->
+{% include 'resume_modal.html' %}
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Підключення необхідних бібліотек -->
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+<!-- Bootstrap Tags Input CSS and JS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.min.js"></script>
+<!-- Ваш JavaScript файл -->
+<script>
+    var jobId = {{ job.id }};
+    var processRankingUrl = "{{ url_for('job.process_ranking', job_id=job.id) }}";
+    var rankingResultsUrl = "{{ url_for('job.ranking_results', job_id=job.id) }}";
+    var dashboardUrl = "{{ url_for('main.dashboard') }}";
+    var resumeUrls = {
+        getResumeInfoBase: "{{ url_for('resume.get_resume_info', resume_id=0)[:-1] }}",
+        resumePdfBase: "{{ url_for('resume.resume_pdf', resume_id=0)[:-1] }}",
+        updateResumeBase: "{{ url_for('resume.update_resume', resume_id=0)[:-1] }}",
+        toggleFavoriteResume: "{{ url_for('resume.toggle_favorite_resume') }}"
+    };
+</script>
+<script type="text/javascript">
+    var languageUrl = "https://cdn.datatables.net/plug-ins/1.10.24/i18n/Ukrainian.json";
+</script>
+<script src="{{ url_for('static', filename='js/rank_resumes.js') }}"></script>
+{% endblock %}
